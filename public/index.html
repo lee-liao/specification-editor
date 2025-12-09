@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OpenSpec Workflow</title>
+    <meta name="description" content="OpenSpec Workflow - A tool for managing OpenSpec files and generating code from specifications">
+    <link rel="stylesheet" href="css/openspec-workflow.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="header-left">
+            <h1><i class="fas fa-code-branch"></i> OpenSpec Workflow</h1>
+        </div>
+        <div class="header-right">
+            <button id="newProjectBtn" class="btn btn-primary">
+                <i class="fas fa-plus"></i> New Project
+            </button>
+            <div class="user-info">
+                <i class="fas fa-user-circle"></i>
+                <span id="userInfo">User</span>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <!-- Left Panel - Navigation -->
+        <aside class="left-panel">
+            <div class="panel-header">
+                <h3><i class="fas fa-folder-tree"></i> Specifications</h3>
+                <button id="uploadBtn" class="btn btn-sm btn-secondary">
+                    <i class="fas fa-upload"></i> Upload
+                </button>
+            </div>
+
+            <div class="spec-tree" id="specTree">
+                <div class="empty-state">
+                    <i class="fas fa-file-upload"></i>
+                    <p>No specifications loaded</p>
+                    <small>Upload an OpenSpec file to get started</small>
+                </div>
+            </div>
+
+            <div class="panel-footer">
+                <div class="workflow-status">
+                    <span class="status-indicator" id="statusIndicator"></span>
+                    <span id="statusText">Ready</span>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Center Panel - Specification Editor -->
+        <section class="center-panel">
+            <div class="editor-header">
+                <div class="editor-tabs">
+                    <div class="tab active" data-tab="specification">
+                        <i class="fas fa-file-code"></i> Specification
+                    </div>
+                    <div class="tab" data-tab="preview">
+                        <i class="fas fa-eye"></i> Preview
+                    </div>
+                    <div class="tab" data-tab="suggestions">
+                        <i class="fas fa-lightbulb"></i> AI Suggestions
+                    </div>
+                </div>
+
+                <div class="editor-actions">
+                    <button id="generateSuggestionsBtn" class="btn btn-sm btn-secondary">
+                        <i class="fas fa-magic"></i> Generate Suggestions
+                    </button>
+                    <button id="saveSpecBtn" class="btn btn-sm btn-primary">
+                        <i class="fas fa-save"></i> Save
+                    </button>
+                </div>
+            </div>
+
+            <div class="editor-content">
+                <!-- Specification Tab -->
+                <div class="tab-content active" id="specificationTab">
+                    <div class="spec-editor">
+                        <div class="editor-toolbar">
+                            <select id="specSelector" class="spec-selector">
+                                <option value="">Select a specification</option>
+                            </select>
+                            <div class="toolbar-actions">
+                                <button class="toolbar-btn" data-action="bold">
+                                    <i class="fas fa-bold"></i>
+                                </button>
+                                <button class="toolbar-btn" data-action="italic">
+                                    <i class="fas fa-italic"></i>
+                                </button>
+                                <button class="toolbar-btn" data-action="list">
+                                    <i class="fas fa-list"></i>
+                                </button>
+                                <button class="toolbar-btn" data-action="link">
+                                    <i class="fas fa-link"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <textarea id="specEditor" class="spec-textarea" placeholder="Select a specification from the left panel to edit..."></textarea>
+                    </div>
+                </div>
+
+                <!-- Preview Tab -->
+                <div class="tab-content" id="previewTab">
+                    <div class="preview-content">
+                        <div id="specPreview" class="spec-preview">
+                            <div class="preview-placeholder">
+                                <i class="fas fa-eye"></i>
+                                <p>Select a specification to preview</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- AI Suggestions Tab -->
+                <div class="tab-content" id="suggestionsTab">
+                    <div class="suggestions-content">
+                        <div class="suggestions-header">
+                            <h4><i class="fas fa-lightbulb"></i> AI Suggestions</h4>
+                            <button id="refreshSuggestionsBtn" class="btn btn-sm btn-secondary">
+                                <i class="fas fa-sync-alt"></i> Refresh
+                            </button>
+                        </div>
+                        <div id="suggestionsList" class="suggestions-list">
+                            <div class="suggestions-placeholder">
+                                <i class="fas fa-robot"></i>
+                                <p>Click "Generate Suggestions" to get AI recommendations</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- AI Assistant Suggestion Box -->
+            <div class="ai-suggestion-box" id="aiSuggestionBox">
+                <div class="suggestion-header">
+                    <i class="fas fa-robot"></i>
+                    <span>AI Assistant</span>
+                    <button class="close-btn" id="closeSuggestionBtn">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                <div class="suggestion-content" id="suggestionContent">
+                    <div class="suggestion-text">
+                        <p>💡 <strong>Suggestion:</strong> Consider adding a validation scenario for the edge case where...</p>
+                        <button class="btn btn-sm btn-primary">Accept</button>
+                        <button class="btn btn-sm btn-secondary">Dismiss</button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Right Panel - Dashboard -->
+        <aside class="right-panel">
+            <div class="panel-header">
+                <h3><i class="fas fa-tachometer-alt"></i> Dashboard</h3>
+            </div>
+
+            <!-- Project Settings -->
+            <div class="dashboard-section">
+                <h4><i class="fas fa-cog"></i> Project Settings</h4>
+                <div class="form-group">
+                    <label for="projectName">Project Name</label>
+                    <input type="text" id="projectName" class="form-control" placeholder="My Project">
+                </div>
+                <div class="form-group">
+                    <label for="repoOwner">Repository Owner</label>
+                    <input type="text" id="repoOwner" class="form-control" placeholder="username">
+                </div>
+                <div class="form-group">
+                    <label for="repoName">Repository Name</label>
+                    <input type="text" id="repoName" class="form-control" placeholder="my-repo">
+                </div>
+                <div class="form-group">
+                    <label class="checkbox-label">
+                        <input type="checkbox" id="privateRepo">
+                        <span>Private Repository</span>
+                    </label>
+                </div>
+            </div>
+
+            <!-- Workflow Steps -->
+            <div class="dashboard-section">
+                <h4><i class="fas fa-tasks"></i> Workflow Steps</h4>
+                <div class="workflow-steps">
+                    <div class="step completed" id="step1">
+                        <div class="step-icon">
+                            <i class="fas fa-upload"></i>
+                        </div>
+                        <div class="step-content">
+                            <h5>1. Upload/OpenSpec</h5>
+                            <small>OpenSpec file uploaded</small>
+                        </div>
+                    </div>
+                    <div class="step active" id="step2">
+                        <div class="step-icon">
+                            <i class="fas fa-edit"></i>
+                        </div>
+                        <div class="step-content">
+                            <h5>2. Edit Content</h5>
+                            <small>Currently editing</small>
+                        </div>
+                    </div>
+                    <div class="step" id="step3">
+                        <div class="step-icon">
+                            <i class="fas fa-robot"></i>
+                        </div>
+                        <div class="step-content">
+                            <h5>3. AI Assistant</h5>
+                            <small>Pending</small>
+                        </div>
+                    </div>
+                    <div class="step" id="step4">
+                        <div class="step-icon">
+                            <i class="fas fa-code-branch"></i>
+                        </div>
+                        <div class="step-content">
+                            <h5>4. Generate PR</h5>
+                            <small>Pending</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Generation Progress -->
+            <div class="dashboard-section">
+                <h4><i class="fas fa-spinner"></i> Generation Progress</h4>
+                <div class="progress-container">
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="progressFill" style="width: 50%"></div>
+                    </div>
+                    <div class="progress-text" id="progressText">Step 2 of 4: Editing Content</div>
+                </div>
+                <div class="progress-details" id="progressDetails">
+                    <small>Last action: Saved specification changes</small>
+                </div>
+            </div>
+
+            <!-- Actions -->
+            <div class="dashboard-section">
+                <h4><i class="fas fa-play"></i> Actions</h4>
+                <div class="action-buttons">
+                    <button id="generateCodeBtn" class="btn btn-primary btn-block">
+                        <i class="fas fa-code"></i> Generate Codebase
+                    </button>
+                    <button id="createPRBtn" class="btn btn-secondary btn-block" disabled>
+                        <i class="fas fa-pull-request"></i> Create Pull Request
+                    </button>
+                    <button id="exportBtn" class="btn btn-outline btn-block">
+                        <i class="fas fa-download"></i> Export Project
+                    </button>
+                </div>
+            </div>
+
+            <!-- Collaboration -->
+            <div class="dashboard-section">
+                <h4><i class="fas fa-users"></i> Collaboration</h4>
+                <div class="collaborators">
+                    <div class="collaborator-item">
+                        <img src="https://ui-avatars.com/api/?name=User&background=405189&color=fff" alt="User" class="collaborator-avatar">
+                        <div class="collaborator-info">
+                            <span class="collaborator-name">Current User</span>
+                            <span class="collaborator-role">Owner</span>
+                        </div>
+                    </div>
+                    <button id="addCollaboratorBtn" class="btn btn-sm btn-outline">
+                        <i class="fas fa-user-plus"></i> Add Collaborator
+                    </button>
+                </div>
+            </div>
+        </aside>
+    </main>
+
+    <!-- File Upload Modal -->
+    <div class="modal" id="uploadModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3><i class="fas fa-upload"></i> Upload OpenSpec File</h3>
+                <button class="close-btn" id="closeUploadModal">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="upload-area" id="uploadArea">
+                    <i class="fas fa-cloud-upload-alt"></i>
+                    <h4>Drop OpenSpec file here or click to browse</h4>
+                    <p>Supports .zip files containing OpenSpec structure</p>
+                    <input type="file" id="fileInput" accept=".zip" style="display: none;">
+                </div>
+                <div class="upload-options">
+                    <label class="checkbox-label">
+                        <input type="checkbox" id="validateStructure" checked>
+                        <span>Validate OpenSpec structure</span>
+                    </label>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" id="cancelUploadBtn">Cancel</button>
+                <button class="btn btn-primary" id="confirmUploadBtn" disabled>Upload</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- New Project Modal -->
+    <div class="modal" id="newProjectModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3><i class="fas fa-plus"></i> New Project</h3>
+                <button class="close-btn" id="closeNewProjectModal">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label for="newProjectName">Project Name</label>
+                    <input type="text" id="newProjectName" class="form-control" placeholder="My OpenSpec Project">
+                </div>
+                <div class="form-group">
+                    <label for="newProjectDescription">Description</label>
+                    <textarea id="newProjectDescription" class="form-control" placeholder="Project description..." rows="3"></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="newRepoOwner">Repository Owner</label>
+                    <input type="text" id="newRepoOwner" class="form-control" placeholder="username or org">
+                </div>
+                <div class="form-group">
+                    <label for="newRepoName">Repository Name</label>
+                    <input type="text" id="newRepoName" class="form-control" placeholder="repository-name">
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" id="cancelNewProjectBtn">Cancel</button>
+                <button class="btn btn-primary" id="createNewProjectBtn">Create Project</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Loading Overlay -->
+    <div class="loading-overlay" id="loadingOverlay">
+        <div class="loading-spinner">
+            <i class="fas fa-spinner fa-spin"></i>
+            <p id="loadingText">Processing...</p>
+        </div>
+    </div>
+
+    <!-- Hidden file input for upload -->
+    <input type="file" id="openspecFileInput" accept=".zip" style="display: none;">
+
+    <script src="js/openspec-workflow.js"></script>
+</body>
+</html>
