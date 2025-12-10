@@ -300,7 +300,7 @@ async def generate_suggestions(
 # Code Generation Routes
 # ============================================
 
-async def run_code_generation(task_id: str, project: Dict[str, Any], branch_name: str):
+async def run_code_generation(task_id: str, project: Dict[str, Any], branch_name: str, custom_prompt: str = None):
     """Background task for code generation."""
     task = task_manager.get(task_id)
     
@@ -400,7 +400,10 @@ async def run_code_generation(task_id: str, project: Dict[str, Any], branch_name
         # Format: https://github.com/owner/repo/tree/branch
         repo_url = f"https://github.com/{project['owner']}/{project['repository']}/tree/{branch_name}"
         
-        prompt = f"Checkout branch '{branch_name}'. Read the OpenSpec files at 'openspec/changes/{change_id}/' and implement the changes described. Provide a summary of changes."
+        if custom_prompt:
+            prompt = custom_prompt
+        else:
+            prompt = f"Checkout branch '{branch_name}'. Read the OpenSpec files at 'openspec/changes/{change_id}/' and implement the changes described. Provide a summary of changes."
         
         agent_task = await claude_task_client.create_task(
             repo_url=repo_url,
@@ -483,7 +486,7 @@ async def generate_codebase(
     }
     
     # Run in background
-    background_tasks.add_task(run_code_generation, task_id, project, request.branchName)
+    background_tasks.add_task(run_code_generation, task_id, project, request.branchName, request.prompt)
     
     return {
         "success": True,

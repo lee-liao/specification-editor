@@ -60,6 +60,7 @@ class Suggestion(BaseModel):
 class GenerateRequest(BaseModel):
     """Request model for code generation."""
     branchName: str = "openspec-implementation"
+    prompt: Optional[str] = None
 
 
 class TaskStatus(BaseModel):

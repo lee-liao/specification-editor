@@ -310,7 +310,7 @@ export function LoadingOverlay({ isVisible, message = 'Processing...' }: Loading
 interface GenerateCodeModalProps {
     isOpen: boolean;
     onClose: () => void;
-    onGenerate: (branchName: string) => void;
+    onGenerate: (branchName: string, prompt: string) => void;
     defaultBranchName?: string;
     isGenerating: boolean;
 }
@@ -325,7 +325,10 @@ export function GenerateCodeModal({
     const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
         const formData = new FormData(e.currentTarget);
-        onGenerate(formData.get('branchName') as string);
+        onGenerate(
+            formData.get('branchName') as string,
+            formData.get('prompt') as string
+        );
     };
 
     return (
@@ -371,6 +374,19 @@ export function GenerateCodeModal({
                         defaultValue={defaultBranchName}
                         placeholder="feature/openspec-implementation"
                         className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
+                    />
+                </div>
+
+                <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Additional Instructions
+                    </label>
+                    <textarea
+                        name="prompt"
+                        rows={3}
+                        defaultValue="Please implement the OpenSpec change under openspec/changes"
+                        placeholder="e.g. Please format the code with Prettier..."
+                        className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none resize-y"
                     />
                 </div>
             </form>

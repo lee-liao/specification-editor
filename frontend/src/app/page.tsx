@@ -219,7 +219,7 @@ export default function HomePage() {
     };
 
     // Confirm Generation
-    const handleConfirmGenerate = async (branchName: string) => {
+    const handleConfirmGenerate = async (branchName: string, prompt: string) => {
         if (!projectId) return;
 
         setIsGenerating(true);
@@ -227,7 +227,7 @@ export default function HomePage() {
         setTargetBranch(branchName);
 
         try {
-            const response = await api.generateCodebase(projectId, branchName);
+            const response = await api.generateCodebase(projectId, branchName, prompt);
 
             if (response.success) {
                 setIsGenerateModalOpen(false);

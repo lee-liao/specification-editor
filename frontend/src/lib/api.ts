@@ -93,10 +93,10 @@ export async function generateSuggestions(projectId: string, specId: string) {
 }
 
 // Code Generation
-export async function generateCodebase(projectId: string, branchName: string = 'openspec-implementation') {
+export async function generateCodebase(projectId: string, branchName: string = 'openspec-implementation', prompt?: string) {
     return apiCall<ApiResponse>(`/api/openspec/projects/${projectId}/generate`, {
         method: 'POST',
-        body: JSON.stringify({ branchName }),
+        body: JSON.stringify({ branchName, prompt }),
     });
 }
 
